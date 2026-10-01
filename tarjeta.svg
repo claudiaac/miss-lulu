@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1400" width="1000" height="1400">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&amp;display=swap');
+      .t { font-family: 'Baloo 2', 'Comic Sans MS', 'Segoe UI', sans-serif; font-weight: 800; text-anchor: middle; }
+    </style>
+    <path id="star" d="M0,-1 L0.235,-0.324 L0.951,-0.309 L0.38,0.124 L0.588,0.809 L0,0.4 L-0.588,0.809 L-0.38,0.124 L-0.951,-0.309 L-0.235,-0.324 Z"/>
+    <path id="heart" d="M0,0.85 C-1.2,0 -0.9,-1 0,-0.45 C0.9,-1 1.2,0 0,0.85 Z"/>
+    <path id="spark" d="M0,-1 Q0.12,-0.12 1,0 Q0.12,0.12 0,1 Q-0.12,0.12 -1,0 Q-0.12,-0.12 0,-1 Z"/>
+    <radialGradient id="bg" cx="50%" cy="45%" r="75%">
+      <stop offset="0" stop-color="#FFF4F8"/>
+      <stop offset="1" stop-color="#FFD3E2"/>
+    </radialGradient>
+    <radialGradient id="manzana" cx="38%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#FF9DB0"/>
+      <stop offset="1" stop-color="#F2557A"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Fondo -->
+  <rect width="1000" height="1400" rx="60" fill="url(#bg)"/>
+  <rect x="30" y="30" width="940" height="1340" rx="44" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-dasharray="2 26" stroke-linecap="round"/>
+  <rect x="58" y="58" width="884" height="1284" rx="34" fill="none" stroke="#F9A8C3" stroke-width="5"/>
+
+  <!-- Decoración (posiciones irregulares para que la RA reconozca bien la tarjeta) -->
+  <use href="#star"  transform="translate(140,150) scale(34) rotate(12)"  fill="#FFD166"/>
+  <use href="#heart" transform="translate(860,170) scale(36) rotate(-15)" fill="#FF7FA3"/>
+  <use href="#spark" transform="translate(250,330) scale(22)"             fill="#B69CFF"/>
+  <use href="#star"  transform="translate(800,360) scale(22) rotate(-20)" fill="#7FD4F5"/>
+  <use href="#heart" transform="translate(120,520) scale(24) rotate(20)"  fill="#B69CFF"/>
+  <use href="#spark" transform="translate(890,560) scale(30)"             fill="#FFD166"/>
+  <use href="#star"  transform="translate(105,800) scale(28) rotate(30)"  fill="#FF7FA3"/>
+  <use href="#heart" transform="translate(900,840) scale(28) rotate(10)"  fill="#7FD4F5"/>
+  <use href="#spark" transform="translate(160,1010) scale(20)"            fill="#7FD4F5"/>
+  <use href="#star"  transform="translate(860,1050) scale(32) rotate(-8)" fill="#B69CFF"/>
+  <use href="#heart" transform="translate(150,1250) scale(30) rotate(-12)" fill="#FFD166"/>
+  <use href="#star"  transform="translate(845,1260) scale(26) rotate(18)" fill="#FF7FA3"/>
+  <use href="#spark" transform="translate(300,1110) scale(16)"            fill="#FF7FA3"/>
+  <use href="#spark" transform="translate(710,1120) scale(18)"            fill="#B69CFF"/>
+  <circle cx="330" cy="300" r="10" fill="#7FD4F5"/>
+  <circle cx="690" cy="270" r="13" fill="#FFD166"/>
+  <circle cx="210" cy="680" r="9"  fill="#FF7FA3"/>
+  <circle cx="820" cy="700" r="11" fill="#B69CFF"/>
+  <circle cx="240" cy="900" r="12" fill="#FFD166"/>
+  <circle cx="770" cy="930" r="8"  fill="#FF7FA3"/>
+  <circle cx="420" cy="1320" r="9" fill="#B69CFF"/>
+  <circle cx="600" cy="1310" r="11" fill="#7FD4F5"/>
+
+  <!-- Texto superior -->
+  <text class="t" x="500" y="235" font-size="62" fill="#C2457A">para mi miss favorita</text>
+
+  <!-- Manzanita kawaii -->
+  <ellipse cx="500" cy="1015" rx="230" ry="28" fill="#F2A3BE" opacity="0.6"/>
+  <path d="M500,525 C505,490 510,465 522,440" stroke="#8B5A3C" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <path d="M522,468 C565,405 650,398 695,428 C650,486 575,500 522,468 Z" fill="#8EDB9C"/>
+  <path d="M535,465 C585,445 630,435 670,430" stroke="#5FB872" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M500,525 C420,470 255,478 238,645 C220,805 330,985 440,995 C470,997 485,985 500,978 C515,985 530,997 560,995 C670,985 780,805 762,645 C745,478 580,470 500,525 Z"
+        fill="url(#manzana)" stroke="#D93E66" stroke-width="6"/>
+  <ellipse cx="335" cy="625" rx="38" ry="70" fill="#FFFFFF" opacity="0.55" transform="rotate(25 335 625)"/>
+  <!-- Carita -->
+  <ellipse cx="420" cy="765" rx="27" ry="34" fill="#3B2A2F"/>
+  <ellipse cx="580" cy="765" rx="27" ry="34" fill="#3B2A2F"/>
+  <circle cx="430" cy="751" r="10" fill="#FFFFFF"/>
+  <circle cx="590" cy="751" r="10" fill="#FFFFFF"/>
+  <circle cx="413" cy="779" r="4.5" fill="#FFFFFF"/>
+  <circle cx="573" cy="779" r="4.5" fill="#FFFFFF"/>
+  <ellipse cx="360" cy="830" rx="42" ry="22" fill="#FF3D6E" opacity="0.4"/>
+  <ellipse cx="640" cy="830" rx="42" ry="22" fill="#FF3D6E" opacity="0.4"/>
+  <path d="M468,815 Q484,840 500,818 Q516,840 532,815" stroke="#3B2A2F" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Moñito -->
+  <g transform="translate(395,520) rotate(-18)">
+    <path d="M0,0 C-45,-40 -70,10 -40,30 C-25,40 -10,20 0,0 Z" fill="#FFD166" stroke="#E8A93A" stroke-width="4"/>
+    <path d="M0,0 C45,-40 70,10 40,30 C25,40 10,20 0,0 Z" fill="#FFD166" stroke="#E8A93A" stroke-width="4"/>
+    <circle r="13" fill="#FFB347" stroke="#E8A93A" stroke-width="4"/>
+  </g>
+
+  <!-- Nombre -->
+  <text class="t" x="500" y="1185" font-size="150" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="26" stroke-linejoin="round">Miss Lulú</text>
+  <text class="t" x="500" y="1185" font-size="150" fill="#F2557A">Miss Lulú</text>
+  <text class="t" x="500" y="1275" font-size="38" fill="#C2457A" opacity="0.85">apunta la cámara aquí ✨</text>
+</svg>
