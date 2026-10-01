@@ -34,7 +34,18 @@
       border: 0; border-radius: 999px; padding: 14px 34px; box-shadow: 0 6px 0 #C2457A; cursor: pointer;
     }
     #btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #C2457A; }
-    #acciones #error { color: #9b1c3c; max-width: 340px; }
+    #error { color: #9b1c3c; font-size: 16px; max-width: 340px; }
+    #error:empty { display: none; }
+    #btn-sin-camara {
+      font: inherit; font-size: 17px; color: var(--rosa-osc); background: none; border: 0;
+      text-decoration: underline; cursor: pointer;
+    }
+    #pista {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 5; display: none;
+      background: rgba(255, 255, 255, .9); color: var(--rosa); font-weight: 800; font-size: 20px;
+      padding: 8px 20px; border-radius: 999px; white-space: nowrap; box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+    }
+    body.camara:not(.encontrada) #pista { display: block; }
 
     /* Contenido que aparece sobre la tarjeta (1000 x 1400 = tamaño de la tarjeta) */
     #ar {
@@ -95,10 +106,6 @@
     }
     body.tarjeta #acciones { display: flex; }
     #acciones small { color: var(--rosa-osc); font-size: 15px; }
-    #btn-camara {
-      font: inherit; font-size: 17px; font-weight: 800; color: var(--rosa); background: #fff;
-      border: 3px solid var(--rosa); border-radius: 999px; padding: 6px 20px; cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -107,16 +114,266 @@
   <div id="inicio">
     <div class="manzana">🍎</div>
     <h1>¡Una sorpresa para Miss Lulú!</h1>
-    <p>Toca el botón para abrir tu tarjeta 💖</p>
+    <p>Toca el botón, permite usar la cámara y apunta a tu tarjeta 💖</p>
     <button id="btn">¡Abrir sorpresa! ✨</button>
+    <p id="error"></p>
+    <button id="btn-sin-camara">o verla sin cámara</button>
   </div>
+
+  <div id="pista">Apunta la cámara a tu tarjeta 🎀</div>
 
   <div id="escena"><img src="tarjeta.png" alt="Tarjeta de cumpleaños para Miss Lulú"></div>
 
   <div id="acciones">
     <small>Toca la tarjeta para repetir 🎶</small>
-    <button id="btn-camara">📷 Verla con la cámara sobre tu tarjeta impresa</button>
-    <small id="error"></small>
+  </div>
+
+  <div id="ar">
+    <div class="titulo">¡Feliz cumpleaños!</div>
+    <svg class="gorrito" viewBox="0 0 200 260" aria-hidden="true">
+      <path d="M100 8 L185 230 Q100 262 15 230 Z" fill="#8A5CF5"/>
+      <path d="M100 8 L128 80 Q100 92 72 80 Z" fill="#FFD166"/>
+      <path d="M62 105 Q100 120 138 105 L152 142 Q100 162 48 142 Z" fill="#7FD4F5"/>
+      <path d="M36 168 Q100 190 164 168 L178 205 Q100 232 22 205 Z" fill="#FF7FA3"/>
+      <circle cx="100" cy="14" r="22" fill="#FFD166"/>
+      <circle cx="58" cy="232" r="14" fill="#fff"/><circle cx="100" cy="242" r="14" fill="#fff"/><circle cx="142" cy="232" r="14" fill="#fff"/>
+    </svg>
+    <div class="pastel">🎂</div>
+    <div class="subtitulo">¡Felicidades, Miss Lulú! 💖</div>
+  </div>
+
+  <script type="module">
+    const ar = document.getElementById('ar');
+
+    // Globos y confeti
+    const globos = ['🎈', '🎈', '🎈', '💖', '🎈', '⭐', '🎈', '🌸'];
+    globos.forEach((g, i) => {
+      const el = document.createElement('div');
+      el.className = 'globo';
+      el.textContent = g;
+      el.style.left = (i % 2 ? 760 + Math.random() * 300 : -260 + Math.random() * 300) + 'px';
+      el.style.setProperty('--dur', (5 + Math.random() * 3).toFixed(1) + 's');
+      el.style.setProperty('--delay', (i * 0.7).toFixed(1) + 's');
+      el.style.setProperty('--vaiven', (Math.random() * 160 - 80).toFixed(0) + 'px');
+      if (i % 3 === 1) el.style.filter = 'hue-rotate(' + (i * 70) + 'deg)';
+      ar.appendChild(el);
+    });
+    const colores = ['#FF7FA3', '#FFD166', '#7FD4F5', '#B69CFF', '#8EDB9C', '#F2557A'];
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElement('div');
+      c.className = 'confeti';
+      c.style.background = colores[i % colores.length];
+      const ang = Math.random() * Math.PI * 2, dist = 450 + Math.random() * 650;
+      c.style.setProperty('--x', (Math.cos(ang) * dist).toFixed(0) + 'px');
+      c.style.setProperty('--y', (Math.sin(ang) * dist).toFixed(0) + 'px');
+      c.style.setProperty('--r', (Math.random() * 1080 - 540).toFixed(0) + 'deg');
+      c.style.setProperty('--delay', (Math.random() * 0.4).toFixed(2) + 's');
+      ar.appendChild(c);
+    }
+
+    // "Happy Birthday" con notitas (Web Audio)
+    let audio, tocando = false;
+    const N = { G4: 392, A4: 440, B4: 493.88, C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99 };
+    const melodia = [
+      ['G4', .75], ['G4', .25], ['A4', 1], ['G4', 1], ['C5', 1], ['B4', 2],
+      ['G4', .75], ['G4', .25], ['A4', 1], ['G4', 1], ['D5', 1], ['C5', 2],
+      ['G4', .75], ['G4', .25], ['G5', 1], ['E5', 1], ['C5', 1], ['B4', 1], ['A4', 2],
+      ['F5', .75], ['F5', .25], ['E5', 1], ['C5', 1], ['D5', 1], ['C5', 3],
+    ];
+    function cantar() {
+      if (!audio || tocando) return;
+      tocando = true;
+      const beat = 0.42;
+      let t = audio.currentTime + 0.15;
+      for (const [nota, dur] of melodia) {
+        const osc = audio.createOscillator(), vol = audio.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = N[nota];
+        vol.gain.setValueAtTime(0, t);
+        vol.gain.linearRampToValueAtTime(0.25, t + 0.02);
+        vol.gain.exponentialRampToValueAtTime(0.001, t + dur * beat * 0.95);
+        osc.connect(vol).connect(audio.destination);
+        osc.start(t);
+        osc.stop(t + dur * beat);
+        t += dur * beat;
+      }
+      setTimeout(() => (tocando = false), (t - audio.currentTime) * 1000 + 1500);
+    }
+
+    function mostrar() {
+      ar.classList.remove('show');
+      void ar.offsetWidth; // reinicia las animaciones
+      ar.classList.add('show');
+      cantar();
+    }
+
+    // Tarjeta en pantalla
+    const escena = document.getElementById('escena');
+    function ajustar() {
+      const alto = innerHeight - 110; // espacio libre arriba de los botones
+      const s = Math.min(innerWidth / 1320, alto / 2000);
+      escena.style.transform = `scale(${s})`;
+      escena.style.top = `${(alto - 1960 * s) / 2 + 400 * s}px`;
+      escena.style.left = `${(innerWidth - 1000 * s) / 2}px`;
+    }
+    function abrirTarjeta() {
+      audio ??= new AudioContext();
+      escena.appendChild(ar);
+      document.body.classList.add('tarjeta');
+      ajustar();
+      setTimeout(mostrar, 700);
+    }
+    addEventListener('resize', ajustar);
+    escena.addEventListener('click', () => { audio ??= new AudioContext(); mostrar(); });
+    document.getElementById('btn-sin-camara').addEventListener('click', abrirTarjeta);
+    if (location.hash === '#demo') abrirTarjeta();
+
+    // Realidad aumentada: al apuntar a la tarjeta impresa suenan las notitas y salen los globos
+    document.getElementById('btn').addEventListener('click', async () => {
+      const btn = document.getElementById('btn'), err = document.getElementById('error');
+      btn.disabled = true;
+      btn.textContent = 'Abriendo cámara… 🎀';
+      err.textContent = '';
+      audio ??= new AudioContext();
+      try {
+        const { MindARThree } = await import('mindar-image-three');
+        const { CSS3DObject } = await import('three/addons/renderers/CSS3DRenderer.js');
+
+        const mindar = new MindARThree({
+          container: document.getElementById('container'),
+          imageTargetSrc: './tarjeta.mind',
+          uiScanning: 'no',
+          filterMinCF: 0.0001,
+          filterBeta: 0.001,
+        });
+        const { renderer, cssRenderer, cssScene, camera } = mindar;
+        const anchor = mindar.addCSSAnchor(0);
+        anchor.group.add(new CSS3DObject(ar));
+        anchor.onTargetFound = () => { document.body.classList.add('encontrada'); mostrar(); };
+        anchor.onTargetLost = () => { document.body.classList.remove('encontrada'); ar.classList.remove('show'); };
+
+        await mindar.start();
+        document.body.classList.add('camara');
+        renderer.setAnimationLoop(() => cssRenderer.render(cssScene, camera));
+      } catch (e) {
+        console.error(e);
+        btn.disabled = false;
+        btn.textContent = 'Intentar de nuevo 🔄';
+        err.textContent = 'No se pudo abrir la cámara. Revisa que diste permiso, o ve la tarjeta sin cámara 👇';
+      }
+    });
+  </script>
+  <style>
+    :root { --rosa: #F2557A; --rosa-osc: #C2457A; --crema: #FFF4F8; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #FFD3E2; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif; }
+    #container { position: fixed; inset: 0; }
+
+    /* Pantalla de inicio */
+    #inicio {
+      position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 18px; padding: 24px; text-align: center;
+      background: radial-gradient(circle at 50% 40%, #FFF4F8, #FFD3E2);
+    }
+    #inicio h1 { margin: 0; color: var(--rosa); font-size: clamp(30px, 9vw, 54px); line-height: 1.05; }
+    #inicio p { margin: 0; color: var(--rosa-osc); font-size: 19px; max-width: 340px; }
+    #inicio .manzana { font-size: 84px; animation: brinco 1.2s ease-in-out infinite; }
+    #btn {
+      font: inherit; font-size: 24px; font-weight: 800; color: #fff; background: var(--rosa);
+      border: 0; border-radius: 999px; padding: 14px 34px; box-shadow: 0 6px 0 #C2457A; cursor: pointer;
+    }
+    #btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #C2457A; }
+    #error { color: #9b1c3c; font-size: 16px; max-width: 340px; }
+    #error:empty { display: none; }
+    #btn-sin-camara {
+      font: inherit; font-size: 17px; color: var(--rosa-osc); background: none; border: 0;
+      text-decoration: underline; cursor: pointer;
+    }
+    #pista {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 5; display: none;
+      background: rgba(255, 255, 255, .9); color: var(--rosa); font-weight: 800; font-size: 20px;
+      padding: 8px 20px; border-radius: 999px; white-space: nowrap; box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+    }
+    body.camara:not(.encontrada) #pista { display: block; }
+
+    /* Contenido que aparece sobre la tarjeta (1000 x 1400 = tamaño de la tarjeta) */
+    #ar {
+      position: relative; width: 1000px; height: 1400px; pointer-events: none;
+      visibility: hidden;
+    }
+    #ar.show { visibility: visible; }
+    .titulo, .subtitulo {
+      position: absolute; left: -150px; width: 1300px; text-align: center; font-weight: 800;
+      -webkit-text-stroke: 14px #fff; paint-order: stroke fill;
+      text-shadow: 0 10px 0 rgba(194, 69, 122, .25);
+    }
+    .titulo { top: -390px; font-size: 170px; color: var(--rosa); line-height: 1; }
+    .subtitulo { top: 1430px; font-size: 96px; color: #8A5CF5; }
+    .show .titulo { animation: pop .9s cubic-bezier(.2, 1.6, .4, 1) both, menear 2.4s ease-in-out .9s infinite; }
+    .show .subtitulo { animation: pop .9s cubic-bezier(.2, 1.6, .4, 1) .5s both, brinco 1.6s ease-in-out 1.4s infinite; }
+
+    .gorrito { position: absolute; left: 300px; top: 205px; width: 230px; transform-origin: 50% 100%; }
+    .show .gorrito { animation: caer .8s cubic-bezier(.3, 1.5, .5, 1) .3s both; }
+
+    .pastel { position: absolute; left: 730px; top: 740px; font-size: 190px; }
+    .show .pastel { animation: pop .8s cubic-bezier(.2, 1.6, .4, 1) .8s both, brinco 1.3s ease-in-out 1.6s infinite; }
+
+    .globo { position: absolute; bottom: -100px; font-size: 150px; }
+    .show .globo { animation: subir var(--dur) ease-in var(--delay) infinite; }
+
+    .confeti { position: absolute; width: 22px; height: 34px; border-radius: 5px; top: 500px; left: 500px; opacity: 0; }
+    .show .confeti { animation: explotar 1.6s ease-out var(--delay) both; }
+
+    @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes menear { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+    @keyframes brinco { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-24px); } }
+    @keyframes caer { from { transform: translateY(-600px) rotate(-40deg); opacity: 0; } to { transform: rotate(-22deg); opacity: 1; } }
+    @keyframes subir {
+      0% { transform: translate(0, 0) rotate(-6deg); opacity: 0; }
+      10% { opacity: 1; }
+      50% { transform: translate(var(--vaiven), -900px) rotate(6deg); }
+      100% { transform: translate(0, -1900px) rotate(-6deg); opacity: 0; }
+    }
+    @keyframes explotar {
+      0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+      100% { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; }
+    }
+
+    /* Tarjeta en pantalla (al tocar "¡Abrir sorpresa!") */
+    body.tarjeta #inicio, body.camara #inicio { display: none; }
+    #escena { position: absolute; width: 1000px; height: 1400px; transform-origin: 0 0; display: none; cursor: pointer; }
+    body.tarjeta #escena { display: block; }
+    #escena img {
+      position: absolute; inset: 0; width: 1000px; height: 1400px; border-radius: 60px;
+      box-shadow: 0 30px 80px rgba(194, 69, 122, .35);
+      animation: aparecer 1s cubic-bezier(.2, 1.4, .4, 1) both;
+    }
+    @keyframes aparecer { from { transform: scale(.15) rotate(-14deg); opacity: 0; } to { transform: none; opacity: 1; } }
+    #acciones {
+      position: fixed; left: 0; right: 0; bottom: 16px; z-index: 5; display: none;
+      flex-direction: column; align-items: center; gap: 6px; text-align: center;
+    }
+    body.tarjeta #acciones { display: flex; }
+    #acciones small { color: var(--rosa-osc); font-size: 15px; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <div id="inicio">
+    <div class="manzana">🍎</div>
+    <h1>¡Una sorpresa para Miss Lulú!</h1>
+    <p>Toca el botón, permite usar la cámara y apunta a tu tarjeta 💖</p>
+    <button id="btn">¡Abrir sorpresa! ✨</button>
+    <p id="error"></p>
+    <button id="btn-sin-camara">o verla sin cámara</button>
+  </div>
+
+  <div id="pista">Apunta la cámara a tu tarjeta 🎀</div>
+
+  <div id="escena"><img src="tarjeta.png" alt="Tarjeta de cumpleaños para Miss Lulú"></div>
+
+  <div id="acciones">
+    <small>Toca la tarjeta para repetir 🎶</small>
   </div>
 
   <div id="ar">

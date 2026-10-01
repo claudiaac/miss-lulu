@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Tarjeta para imprimir</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    @page { size: letter landscape; margin: 0; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { margin: 0; background: #fff; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif; }
+    .hoja { width: 279.4mm; height: 215.9mm; display: flex; align-items: center; justify-content: center; position: relative; }
+    .panel { width: 125mm; height: 175mm; position: relative; }
+    .panel img.frente { width: 100%; height: 100%; display: block; }
+    .doblez { width: 0; height: 185mm; border-left: 0.3mm dashed #d9a3b8; }
+    .tijeras { position: absolute; font-size: 10pt; color: #c98aa3; }
+
+    .reverso {
+      background: radial-gradient(circle at 50% 40%, #FFF4F8, #FFD3E2); border-radius: 7.5mm;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; color: #C2457A; padding: 10mm;
+    }
+    .reverso h2 { margin: 0; font-size: 26pt; line-height: 1; color: #F2557A; }
+    .reverso .qr { width: 62mm; height: 62mm; margin: 6mm 0; border-radius: 4mm; border: 1.2mm solid #fff; }
+    .reverso ol { margin: 0; padding-left: 6mm; text-align: left; font-size: 12.5pt; line-height: 1.35; font-weight: 700; }
+    .reverso .nota { margin-top: 5mm; font-size: 10.5pt; opacity: .85; }
+  </style>
+</head>
+<body>
+  <div class="hoja">
+    <span class="tijeras" style="top: 12mm; left: 50%; transform: translateX(-50%)">doblar aquí</span>
+    <div class="panel reverso">
+      <h2>¡Escanéame! 📱</h2>
+      <img class="qr" src="qr.png" alt="Código QR">
+      <ol>
+        <li>Escanea el código con tu celular</li>
+        <li>Toca <b>¡Abrir sorpresa!</b></li>
+        <li>Apunta la cámara al frente de la tarjeta 🍎</li>
+      </ol>
+      <div class="nota">🔊 Sube el volumen</div>
+    </div>
+    <div class="doblez"></div>
+    <div class="panel"><img class="frente" src="tarjeta-imprimir.png" alt="Tarjeta"></div>
+  </div>
+</body>
+</html>
