@@ -34,7 +34,7 @@
       border: 0; border-radius: 999px; padding: 14px 34px; box-shadow: 0 6px 0 #C2457A; cursor: pointer;
     }
     #btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #C2457A; }
-    #error { color: #9b1c3c; font-size: 16px; display: none; max-width: 340px; }
+    #acciones #error { color: #9b1c3c; max-width: 340px; }
 
     /* Contenido que aparece sobre la tarjeta (1000 x 1400 = tamaño de la tarjeta) */
     #ar {
@@ -79,11 +79,26 @@
       100% { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; }
     }
 
-    /* Modo demo (index.html#demo): ver la animación sin cámara */
-    body.demo { overflow: auto; }
-    body.demo #inicio { display: none; }
-    #demo-escena { position: relative; width: 1000px; height: 1400px; margin: 0 auto; transform-origin: 0 0; }
-    #demo-escena img { position: absolute; inset: 0; width: 1000px; height: 1400px; border-radius: 60px; }
+    /* Tarjeta en pantalla (al tocar "¡Abrir sorpresa!") */
+    body.tarjeta #inicio, body.camara #inicio { display: none; }
+    #escena { position: absolute; width: 1000px; height: 1400px; transform-origin: 0 0; display: none; cursor: pointer; }
+    body.tarjeta #escena { display: block; }
+    #escena img {
+      position: absolute; inset: 0; width: 1000px; height: 1400px; border-radius: 60px;
+      box-shadow: 0 30px 80px rgba(194, 69, 122, .35);
+      animation: aparecer 1s cubic-bezier(.2, 1.4, .4, 1) both;
+    }
+    @keyframes aparecer { from { transform: scale(.15) rotate(-14deg); opacity: 0; } to { transform: none; opacity: 1; } }
+    #acciones {
+      position: fixed; left: 0; right: 0; bottom: 16px; z-index: 5; display: none;
+      flex-direction: column; align-items: center; gap: 6px; text-align: center;
+    }
+    body.tarjeta #acciones { display: flex; }
+    #acciones small { color: var(--rosa-osc); font-size: 15px; }
+    #btn-camara {
+      font: inherit; font-size: 17px; font-weight: 800; color: var(--rosa); background: #fff;
+      border: 3px solid var(--rosa); border-radius: 999px; padding: 6px 20px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -92,9 +107,16 @@
   <div id="inicio">
     <div class="manzana">🍎</div>
     <h1>¡Una sorpresa para Miss Lulú!</h1>
-    <p>Toca el botón, permite usar la cámara y apunta a tu tarjeta 💖</p>
+    <p>Toca el botón para abrir tu tarjeta 💖</p>
     <button id="btn">¡Abrir sorpresa! ✨</button>
-    <p id="error"></p>
+  </div>
+
+  <div id="escena"><img src="tarjeta.png" alt="Tarjeta de cumpleaños para Miss Lulú"></div>
+
+  <div id="acciones">
+    <small>Toca la tarjeta para repetir 🎶</small>
+    <button id="btn-camara">📷 Verla con la cámara sobre tu tarjeta impresa</button>
+    <small id="error"></small>
   </div>
 
   <div id="ar">
@@ -176,39 +198,34 @@
       cantar();
     }
 
-    // Modo demo: index.html#demo
-    if (location.hash === '#demo') {
-      document.body.classList.add('demo');
-      const escena = document.createElement('div');
-      escena.id = 'demo-escena';
-      escena.innerHTML = '<img src="tarjeta.png" alt="Tarjeta">';
-      escena.appendChild(ar);
-      document.body.appendChild(escena);
-      const ajustar = () => {
-        const s = Math.min(innerWidth / 1500, innerHeight / 2300);
-        escena.style.position = 'absolute';
-        escena.style.margin = '0';
-        escena.style.transform = `scale(${s})`;
-        escena.style.top = `${380 * s}px`;
-        escena.style.left = `${(innerWidth - 1000 * s) / 2}px`;
-      };
-      ajustar();
-      addEventListener('resize', ajustar);
-      document.body.addEventListener('click', () => {
-        audio ??= new AudioContext();
-        mostrar();
-      });
-      setTimeout(mostrar, 300);
+    // Tarjeta en pantalla
+    const escena = document.getElementById('escena');
+    function ajustar() {
+      const alto = innerHeight - 110; // espacio libre arriba de los botones
+      const s = Math.min(innerWidth / 1320, alto / 2000);
+      escena.style.transform = `scale(${s})`;
+      escena.style.top = `${(alto - 1960 * s) / 2 + 400 * s}px`;
+      escena.style.left = `${(innerWidth - 1000 * s) / 2}px`;
     }
+    function abrirTarjeta() {
+      audio ??= new AudioContext();
+      escena.appendChild(ar);
+      document.body.classList.add('tarjeta');
+      ajustar();
+      setTimeout(mostrar, 700);
+    }
+    addEventListener('resize', ajustar);
+    escena.addEventListener('click', () => { audio ??= new AudioContext(); mostrar(); });
+    document.getElementById('btn').addEventListener('click', abrirTarjeta);
+    if (location.hash === '#demo') abrirTarjeta();
 
     // Realidad aumentada
-    document.getElementById('btn').addEventListener('click', async () => {
-      const btn = document.getElementById('btn'), err = document.getElementById('error');
+    document.getElementById('btn-camara').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-camara'), err = document.getElementById('error');
       btn.disabled = true;
-      btn.textContent = 'Cargando… 🎀';
-      audio = new AudioContext();
+      btn.textContent = 'Abriendo cámara… 🎀';
+      err.textContent = '';
       try {
-        const THREE = await import('three');
         const { MindARThree } = await import('mindar-image-three');
         const { CSS3DObject } = await import('three/addons/renderers/CSS3DRenderer.js');
 
@@ -220,19 +237,20 @@
         });
         const { renderer, cssRenderer, cssScene, camera } = mindar;
         const anchor = mindar.addCSSAnchor(0);
+        ar.classList.remove('show');
         anchor.group.add(new CSS3DObject(ar));
         anchor.onTargetFound = mostrar;
         anchor.onTargetLost = () => ar.classList.remove('show');
 
         await mindar.start();
-        document.getElementById('inicio').style.display = 'none';
+        document.body.classList.replace('tarjeta', 'camara');
         renderer.setAnimationLoop(() => cssRenderer.render(cssScene, camera));
       } catch (e) {
         console.error(e);
+        escena.appendChild(ar);
         btn.disabled = false;
-        btn.textContent = 'Intentar de nuevo 🔄';
-        err.style.display = 'block';
-        err.textContent = 'No se pudo abrir la cámara. Revisa que diste permiso y que la página se abrió con https:// 🙏';
+        btn.textContent = '📷 Intentar de nuevo';
+        err.textContent = 'No se pudo abrir la cámara. Revisa que diste permiso 🙏';
       }
     });
   </script>
