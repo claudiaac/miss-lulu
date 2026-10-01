@@ -18,7 +18,9 @@
   <style>
     :root { --rosa: #F2557A; --rosa-osc: #C2457A; --crema: #FFF4F8; }
     html, body { margin: 0; height: 100%; overflow: hidden; background: #FFD3E2; font-family: 'Baloo 2', 'Comic Sans MS', sans-serif; }
-    #container { position: fixed; inset: 0; }
+    /* z-index crea su propia capa: así el video de la cámara (z-index -2) no queda detrás del fondo rosa */
+    #container { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+    html:has(body.camara), body.camara { background: #000; }
 
     /* Pantalla de inicio */
     #inicio {
@@ -252,7 +254,11 @@
         anchor.onTargetFound = () => { document.body.classList.add('encontrada'); mostrar(); };
         anchor.onTargetLost = () => { document.body.classList.remove('encontrada'); ar.classList.remove('show'); };
 
+        const aviso = setTimeout(() => {
+          err.textContent = '¿No se abre la cámara? Abre esta página en Chrome o Safari (menú ⋮ → "Abrir en el navegador") 🙏';
+        }, 12000);
         await mindar.start();
+        clearTimeout(aviso);
         document.body.classList.add('camara');
         renderer.setAnimationLoop(() => cssRenderer.render(cssScene, camera));
       } catch (e) {
